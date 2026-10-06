@@ -28,6 +28,6 @@ cd local-dotnet-worker
 python -m samples.01_hello_world
 ```
 
-> ℹ️ Run samples as modules (`python -m samples.XX`) so the parent folder
+> Run samples as modules (`python -m samples.XX`) so the parent folder
 > containing `document_sdk.py` is on `sys.path`. A bare `python samples/XX.py`
 > would fail with `ModuleNotFoundError: No module named 'document_sdk'`.

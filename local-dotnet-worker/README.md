@@ -39,7 +39,7 @@ python document_sdk.py watermark-pdf     --input output/workbook.pdf   --output 
 
 Replace `win-x64` with `osx-arm64`, `osx-x64`, or `linux-x64` as needed.
 
-> ⏱️ Each operation runs in a fresh `dotnet` subprocess with a default
+> Each operation runs in a fresh `dotnet` subprocess with a default
 > per-operation timeout of **300 seconds**. Override with `--timeout <seconds>`
 > on any subcommand for large PPTX/XLSX conversions.
 

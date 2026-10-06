@@ -15,7 +15,7 @@ python -m venv .venv
 pip install -r requirements.txt
 ```
 
-> ⚠️ Make sure to run `python samples/...` from inside the venv where
+> Make sure to run `python samples/...` from inside the venv where
 > `pythonnet` is installed.
 
 All samples use `--trial` by default so they run without a Syncfusion license.
@@ -37,6 +37,6 @@ cd pythonnet-wrapper
 python -m samples.01_hello_world
 ```
 
-> ℹ️ Run samples as modules (`python -m samples.XX`) so the parent folder
+> Run samples as modules (`python -m samples.XX`) so the parent folder
 > containing `document_sdk.py` is on `sys.path`. A bare `python samples/XX.py`
 > would fail with `ModuleNotFoundError: No module named 'document_sdk'`.
