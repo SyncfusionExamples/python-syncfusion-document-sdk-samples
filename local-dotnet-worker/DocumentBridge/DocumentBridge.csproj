@@ -1,0 +1,28 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+    <OutputType>Exe</OutputType>
+    <UseAppHost>false</UseAppHost>
+    <!-- Force the assembly name to match the project folder so the published
+         artifacts/ folder contains DocumentBridge.dll / .runtimeconfig.json. -->
+    <AssemblyName>DocumentBridge</AssemblyName>
+    <RootNamespace>DocumentInterop</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <!-- DocIO + DocIORenderer: Word generation and Word -> PDF. -->
+    <PackageReference Include="Syncfusion.DocIORenderer.Net.Core" Version="34.2.5" />
+    <!-- XlsIO + XlsIORenderer: Excel -> PDF. -->
+    <PackageReference Include="Syncfusion.XlsIORenderer.Net.Core" Version="34.2.5" />
+    <!-- Presentation + PresentationRenderer: PowerPoint -> PDF. -->
+    <PackageReference Include="Syncfusion.PresentationRenderer.Net.Core" Version="34.2.5" />
+    <!-- PDF (loaded document, graphics): used by the WatermarkPdf operation. -->
+    <PackageReference Include="Syncfusion.Pdf.Net.Core" Version="34.2.5" />
+    <!-- Native rendering assets required on Linux hosts. Harmless to include on Windows/macOS. -->
+    <PackageReference Include="SkiaSharp.NativeAssets.Linux" Version="3.119.1" />
+    <PackageReference Include="HarfBuzzSharp.NativeAssets.Linux" Version="8.3.1.2" />
+  </ItemGroup>
+</Project>

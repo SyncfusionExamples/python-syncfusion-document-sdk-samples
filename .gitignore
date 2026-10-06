@@ -1,0 +1,20 @@
+# .NET
+bin/
+obj/
+artifacts/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Sample output
+output/
+*.docx
+*.pdf
+!documents/**
+
+# OS
+.DS_Store
+Thumbs.db
