@@ -17,8 +17,8 @@ def main() -> None:
     docx_path = out_dir / "Hello.docx"
     pdf_path = out_dir / "Hello.pdf"
 
-    service.create_docx("Hello from Python.NET and DocIO!", docx_path, allow_trial=True)
-    service.create_pdf("Hello from Python.NET and DocIO!", pdf_path, allow_trial=True)
+    service.create_docx("Hello from Python.NET and DocIO!", docx_path)
+    service.create_pdf("Hello from Python.NET and DocIO!", pdf_path)
 
     print("Saved:", docx_path)
     print("Saved:", pdf_path)

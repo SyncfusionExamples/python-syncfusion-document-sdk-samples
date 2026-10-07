@@ -35,7 +35,7 @@ def main() -> None:
 
     if args.input is None:
         pptx = out_dir / "input.pptx"
-        service.create_sample_pptx(pptx, allow_trial=True)
+        service.create_sample_pptx(pptx)
         print("Generated sample presentation:", pptx)
     else:
         pptx = args.input.resolve()
@@ -43,7 +43,7 @@ def main() -> None:
             raise SystemExit(f"Input presentation not found: {pptx}")
 
     pdf = out_dir / "slides.pdf"
-    service.powerpoint_to_pdf(pptx, pdf, allow_trial=True)
+    service.powerpoint_to_pdf(pptx, pdf)
     print("Saved:", pdf)
 
 

@@ -17,8 +17,8 @@ def main() -> None:
     docx_path = out_dir / "Hello.docx"
     pdf_path = out_dir / "Hello.pdf"
 
-    service.create_docx("Hello from the local .NET worker!", docx_path, allow_trial=True)
-    service.create_pdf("Hello from the local .NET worker!", pdf_path, allow_trial=True)
+    service.create_docx("Hello from the local .NET worker!", docx_path)
+    service.create_pdf("Hello from the local .NET worker!", pdf_path)
 
     print("Saved:", docx_path)
     print("Saved:", pdf_path)

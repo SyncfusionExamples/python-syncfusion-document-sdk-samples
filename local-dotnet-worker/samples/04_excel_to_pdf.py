@@ -35,7 +35,7 @@ def main() -> None:
 
     if args.input is None:
         xlsx = out_dir / "input.xlsx"
-        service.create_sample_xlsx(xlsx, allow_trial=True)
+        service.create_sample_xlsx(xlsx)
         print("Generated sample workbook:", xlsx)
     else:
         xlsx = args.input.resolve()
@@ -43,7 +43,7 @@ def main() -> None:
             raise SystemExit(f"Input workbook not found: {xlsx}")
 
     pdf = out_dir / "workbook.pdf"
-    service.excel_to_pdf(xlsx, pdf, allow_trial=True)
+    service.excel_to_pdf(xlsx, pdf)
     print("Saved:", pdf)
 
 

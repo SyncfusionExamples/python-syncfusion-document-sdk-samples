@@ -69,15 +69,15 @@ cd local-dotnet-worker
 dotnet publish DocumentBridge/DocumentBridge.csproj -c Release -r win-x64 --self-contained false -o artifacts
 
 # 2. Run with plain Python (creates output/Sample.docx)
-python document_sdk.py create-docx --trial
+python document_sdk.py create-docx
 
 # 3. Render directly to PDF without an intermediate DOCX
-python document_sdk.py create-pdf  --trial
+python document_sdk.py create-pdf
 
 # 4. Convert an existing XLSX/PPTX file to PDF, or watermark a PDF
-python document_sdk.py excel-to-pdf      --input documents/input.xlsx --output output/workbook.pdf     --trial
-python document_sdk.py powerpoint-to-pdf --input documents/input.pptx --output output/slides.pdf      --trial
-python document_sdk.py watermark-pdf     --input output/workbook.pdf  --output output/watermarked.pdf --label CONFIDENTIAL --trial
+python document_sdk.py excel-to-pdf      --input documents/input.xlsx --output output/workbook.pdf
+python document_sdk.py powerpoint-to-pdf --input documents/input.pptx --output output/slides.pdf
+python document_sdk.py watermark-pdf     --input output/workbook.pdf  --output output/watermarked.pdf --label CONFIDENTIAL
 ```
 
 ### Approach 2: Python.NET Wrapper (`pythonnet-wrapper/`)
@@ -94,22 +94,28 @@ python -m venv .venv
 pip install -r requirements.txt
 
 # 3. Run in-process
-python document_sdk.py create-docx --trial
-python document_sdk.py create-pdf  --trial
+python document_sdk.py create-docx
+python document_sdk.py create-pdf
 
 # 4. Convert an existing XLSX/PPTX file to PDF, or watermark a PDF
-python document_sdk.py excel-to-pdf      --input documents/input.xlsx --output output/workbook.pdf     --trial
-python document_sdk.py powerpoint-to-pdf --input documents/input.pptx --output output/slides.pdf      --trial
-python document_sdk.py watermark-pdf     --input output/workbook.pdf  --output output/watermarked.pdf --label CONFIDENTIAL --trial
+python document_sdk.py excel-to-pdf      --input documents/input.xlsx --output output/workbook.pdf
+python document_sdk.py powerpoint-to-pdf --input documents/input.pptx --output output/slides.pdf
+python document_sdk.py watermark-pdf     --input output/workbook.pdf  --output output/watermarked.pdf --label CONFIDENTIAL
 ```
 
 ---
 
 ## Licensing & Evaluation
 
-Both samples support evaluation without a license key by passing the `--trial` flag (evaluation watermarks may appear on the output).
+Both samples run in Syncfusion's **trial mode by default** — no license flag is
+required, and no Python method takes one. Evaluation watermarks are added to
+the output documents in this mode.
 
-For licensed production use, set the `SYNCFUSION_LICENSE_KEY` environment variable and run without `--trial`:
+For licensed production use, set the `SYNCFUSION_LICENSE_KEY` environment
+variable before running the command. The .NET code reads the variable via
+`Environment.GetEnvironmentVariable("SYNCFUSION_LICENSE_KEY")` and registers
+it via `SyncfusionLicenseProvider.RegisterLicense(key)`. Keys are never
+passed on the command line.
 
 ```bash
 # Windows PowerShell
@@ -117,9 +123,10 @@ $env:SYNCFUSION_LICENSE_KEY="YOUR_KEY_HERE"
 
 # Linux / macOS
 export SYNCFUSION_LICENSE_KEY="YOUR_KEY_HERE"
-```
 
-The .NET code automatically reads this variable via `Environment.GetEnvironmentVariable("SYNCFUSION_LICENSE_KEY")` and registers it via `SyncfusionLicenseProvider.RegisterLicense(key)`. Keys are never passed on the command line.
+# Then run any sample as usual — no extra flag is needed.
+python document_sdk.py create-pdf
+```
 
 ---
 
