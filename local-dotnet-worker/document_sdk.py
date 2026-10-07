@@ -13,17 +13,18 @@ Python callers do not need to change.
 """
 import argparse
 import json
+import os
 import shutil
 import subprocess
+import sys
 from pathlib import Path
 
 
 class DocumentService:
     """Thin client that starts the .NET worker once per operation."""
 
-    def __init__(self, dll: Path, dotnet: str, timeout: int = 300):
-        self._dll = dll
-        self._dotnet = dotnet
+    def __init__(self, executable: list[str], timeout: int = 300):
+        self._executable = executable
         # Default is generous because large PPTX/XLSX -> PDF conversions can
         # easily exceed a minute. Callers can override per-instance.
         self._timeout = timeout
@@ -47,7 +48,7 @@ class DocumentService:
         # interpreted as a command line, so paths/text cannot inject commands.
         try:
             result = subprocess.run(
-                [self._dotnet, str(self._dll)],
+                self._executable,
                 input=json.dumps(request),
                 text=True,
                 encoding="utf-8",
@@ -101,13 +102,21 @@ class DocumentService:
 
 
 def load_service(bundle: Path | None = None) -> DocumentService:
-    """Locate the published worker and the dotnet executable.
+    """Locate the published worker executable or dll.
 
-    The worker inherits ``SYNCFUSION_LICENSE_KEY`` from the current environment
-    if set; the key is never passed as a command-line argument.
+    When built with <UseAppHost>true</UseAppHost>, the native apphost executable
+    (DocumentBridge.exe on Windows, DocumentBridge on Unix) is preferred so
+    Syncfusion's evaluation/trial watermarking triggers properly.
+    Falls back to `dotnet DocumentBridge.dll` if the native host is absent.
     """
     bundle = Path(bundle or Path(__file__).parent / "artifacts").resolve()
+    apphost_name = "DocumentBridge.exe" if sys.platform.startswith("win") else "DocumentBridge"
+    apphost = bundle / apphost_name
     dll = bundle / "DocumentBridge.dll"
+
+    if apphost.is_file():
+        return DocumentService([str(apphost)])
+
     config = bundle / "DocumentBridge.runtimeconfig.json"
     if not dll.is_file() or not config.is_file():
         raise FileNotFoundError(f"Publish DocumentBridge into {bundle} first (see README).")
@@ -116,7 +125,7 @@ def load_service(bundle: Path | None = None) -> DocumentService:
     if dotnet is None:
         raise RuntimeError("Install the .NET 8 runtime/SDK and put dotnet on PATH.")
 
-    return DocumentService(dll, dotnet)
+    return DocumentService([dotnet, str(dll)])
 
 
 # Each CLI subcommand maps to one DocumentService method. Tuple shape:

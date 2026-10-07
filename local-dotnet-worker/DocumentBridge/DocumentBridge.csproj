@@ -6,7 +6,7 @@
     <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     <OutputType>Exe</OutputType>
-    <UseAppHost>false</UseAppHost>
+    <UseAppHost>true</UseAppHost>
     <!-- Force the assembly name to match the project folder so the published
          artifacts/ folder contains DocumentBridge.dll / .runtimeconfig.json. -->
     <AssemblyName>DocumentBridge</AssemblyName>
