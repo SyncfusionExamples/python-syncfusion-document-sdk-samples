@@ -18,8 +18,9 @@ pip install -r requirements.txt
 > Make sure to run `python samples/...` from inside the venv where
 > `pythonnet` is installed.
 
-All samples use `--trial` by default so they run without a Syncfusion license.
-Remove `--trial` and set `SYNCFUSION_LICENSE_KEY` to use a real license.
+All samples run in Syncfusion's **trial mode** by default, so they work
+without a license. To produce watermark-free output, set the
+`SYNCFUSION_LICENSE_KEY` environment variable before running the sample.
 
 | Sample | What it does |
 |---|---|

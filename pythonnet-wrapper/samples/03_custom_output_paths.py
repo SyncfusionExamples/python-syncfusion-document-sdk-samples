@@ -36,8 +36,8 @@ def main() -> None:
 
     docx_path = out_dir / "Report.docx"
     pdf_path = out_dir / "Report.pdf"
-    service.create_docx(args.text, docx_path, allow_trial=True)
-    service.create_pdf(args.text, pdf_path, allow_trial=True)
+    service.create_docx(args.text, docx_path)
+    service.create_pdf(args.text, pdf_path)
 
     print("Saved DOCX:", docx_path)
     print("Saved PDF: ", pdf_path)

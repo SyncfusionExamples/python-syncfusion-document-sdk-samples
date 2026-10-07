@@ -28,16 +28,33 @@ local-dotnet-worker/
 dotnet publish DocumentBridge/DocumentBridge.csproj -c Release -r win-x64 --self-contained false -o artifacts
 
 # Build a Word document and save it as DOCX, then render it straight to PDF.
-python document_sdk.py create-docx --trial
-python document_sdk.py create-pdf  --trial
+python document_sdk.py create-docx
+python document_sdk.py create-pdf
 
 # Convert an existing workbook / presentation to PDF, or watermark a PDF.
-python document_sdk.py excel-to-pdf      --input documents/input.xlsx  --output output/workbook.pdf --trial
-python document_sdk.py powerpoint-to-pdf --input documents/input.pptx  --output output/slides.pdf  --trial
-python document_sdk.py watermark-pdf     --input output/workbook.pdf   --output output/watermarked.pdf --label CONFIDENTIAL --trial
+python document_sdk.py excel-to-pdf      --input documents/input.xlsx  --output output/workbook.pdf
+python document_sdk.py powerpoint-to-pdf --input documents/input.pptx  --output output/slides.pdf
+python document_sdk.py watermark-pdf     --input output/workbook.pdf   --output output/watermarked.pdf --label CONFIDENTIAL
 ```
 
-Replace `win-x64` with `osx-arm64`, `osx-x64`, or `linux-x64` as needed.
+Replace `win-x64` with the RID that matches your platform (`osx-arm64`,
+`osx-x64`, or `linux-x64`). When cross-publishing from Windows, pick the
+RID that matches the **target** machine, not the host.
+
+> Every command runs in Syncfusion's **trial mode** by default — no license
+> is required, and evaluation watermarks are added to the output documents.
+> To produce watermark-free output, set the `SYNCFUSION_LICENSE_KEY`
+> environment variable before running the command:
+>
+> ```bash
+> # Windows PowerShell
+> $env:SYNCFUSION_LICENSE_KEY = "your-key"
+> # bash / zsh
+> SYNCFUSION_LICENSE_KEY=your-key python document_sdk.py create-pdf
+> ```
+>
+> The worker reads the variable on first use; Python callers do not need to
+> pass any flag per call.
 
 > Each operation runs in a fresh `dotnet` subprocess with a default
 > per-operation timeout of **300 seconds**. Override with `--timeout <seconds>`

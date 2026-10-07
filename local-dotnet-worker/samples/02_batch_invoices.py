@@ -24,7 +24,7 @@ def main() -> None:
     for record in RECORDS:
         text = f"Invoice {record['id']} for {record['customer']} — {record['amount']}"
         out_path = out_dir / f"{record['id']}.docx"
-        service.create_docx(text, out_path, allow_trial=True)
+        service.create_docx(text, out_path)
         print(f"  {record['id']} -> {out_path.name}")
 
     print(f"Wrote {len(RECORDS)} invoices into {out_dir}")

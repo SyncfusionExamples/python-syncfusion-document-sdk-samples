@@ -49,7 +49,7 @@ def main() -> None:
     if args.input is None:
         source = out_dir / "Hello.pdf"
         # Match the wording used by sample 01 for the pythonnet track.
-        service.create_pdf("Hello from Python.NET and DocIO!", source, allow_trial=True)
+        service.create_pdf("Hello from Python.NET and DocIO!", source)
         print("Generated sample PDF:", source)
     else:
         source = args.input.resolve()
@@ -57,7 +57,7 @@ def main() -> None:
             raise SystemExit(f"Input PDF not found: {source}")
 
     watermarked = out_dir / f"watermarked-{_slug_label(args.label)}.pdf"
-    service.watermark_pdf(source, watermarked, args.label, allow_trial=True)
+    service.watermark_pdf(source, watermarked, args.label)
     print("Saved:", watermarked)
 
 

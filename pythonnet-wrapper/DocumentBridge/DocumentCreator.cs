@@ -9,8 +9,6 @@ using Syncfusion.Pdf;
 using Syncfusion.Pdf.Parsing;
 using Syncfusion.Pdf.Graphics;
 using Syncfusion.Licensing;
-// SizeF/RectangleF/PdfFont etc. live in Syncfusion.Drawing and are used by
-// PdfGraphics. Importing it resolves `RectangleF` in the watermark code below.
 using Syncfusion.Drawing;
 
 namespace DocumentInterop;
@@ -19,28 +17,32 @@ namespace DocumentInterop;
 /// Exposed to Python via Python.NET (pythonnet). The methods are static and
 /// can be invoked directly from Python:
 ///     from DocumentInterop import DocumentCreator
-///     DocumentCreator.CreateDocx(text, path, allowTrial)
-///     DocumentCreator.ExcelToPdf(input, output, allowTrial)
-///     DocumentCreator.PowerPointToPdf(input, output, allowTrial)
-///     DocumentCreator.WatermarkPdf(input, output, label, allowTrial)
+///     DocumentCreator.CreateDocx(text, path)
+///     DocumentCreator.ExcelToPdf(input, output)
+///     DocumentCreator.PowerPointToPdf(input, output)
+///     DocumentCreator.WatermarkPdf(input, output, label)
+///
+/// License registration is driven entirely by the ``SYNCFUSION_LICENSE_KEY``
+/// environment variable; when unset, every operation runs in Syncfusion's
+/// trial mode (evaluation watermarks may be added to the output).
 /// </summary>
 public static class DocumentCreator
 {
     // ---- Word: build from a string ----------------------------------------------------
 
     // Build a new Word document and save it directly as DOCX.
-    public static void CreateDocx(string text, string outputPath, bool allowTrial)
+    public static void CreateDocx(string text, string outputPath)
     {
-        ConfigureLicense(allowTrial);
+        ConfigureLicense();
         using var document = CreateDocument(text);
         using var output = OpenOutput(outputPath);
         document.Save(output, Syncfusion.DocIO.FormatType.Docx);
     }
 
     // Build a new Word document and render it straight to PDF via DocIORenderer.
-    public static void CreatePdf(string text, string outputPath, bool allowTrial)
+    public static void CreatePdf(string text, string outputPath)
     {
-        ConfigureLicense(allowTrial);
+        ConfigureLicense();
         using var document = CreateDocument(text);
         using var renderer = new DocIORenderer();
         using var pdf = renderer.ConvertToPDF(document);
@@ -62,9 +64,9 @@ public static class DocumentCreator
     // ---- Excel: convert an existing XLSX file to PDF ----------------------------------
 
     // Convert an XLSX workbook to PDF using its own print settings.
-    public static void ExcelToPdf(string inputPath, string outputPath, bool allowTrial)
+    public static void ExcelToPdf(string inputPath, string outputPath)
     {
-        ConfigureLicense(allowTrial);
+        ConfigureLicense();
         if (!File.Exists(inputPath))
             throw new FileNotFoundException("Input workbook not found.", inputPath);
         using var engine = new ExcelEngine();
@@ -84,9 +86,9 @@ public static class DocumentCreator
     // ---- PowerPoint: convert an existing PPTX file to PDF -----------------------------
 
     // Convert a PPTX presentation to PDF using Syncfusion's presentation renderer.
-    public static void PowerPointToPdf(string inputPath, string outputPath, bool allowTrial)
+    public static void PowerPointToPdf(string inputPath, string outputPath)
     {
-        ConfigureLicense(allowTrial);
+        ConfigureLicense();
         if (!File.Exists(inputPath))
             throw new FileNotFoundException("Input presentation not found.", inputPath);
         using var stream = File.OpenRead(inputPath);
@@ -99,9 +101,9 @@ public static class DocumentCreator
     // ---- PDF: overlay a diagonal text watermark on every page -------------------------
 
     // Draw a translucent diagonal label on every page of an existing PDF.
-    public static void WatermarkPdf(string inputPath, string outputPath, string label, bool allowTrial)
+    public static void WatermarkPdf(string inputPath, string outputPath, string label)
     {
-        ConfigureLicense(allowTrial);
+        ConfigureLicense();
         ArgumentException.ThrowIfNullOrWhiteSpace(label);
         if (!File.Exists(inputPath))
             throw new FileNotFoundException("Input PDF not found.", inputPath);
@@ -141,9 +143,9 @@ public static class DocumentCreator
 
     // Build a tiny XLSX with one cell of text. Lets the samples run end-to-end without
     // shipping a binary fixture in the repository.
-    public static void CreateSampleXlsx(string outputPath, bool allowTrial)
+    public static void CreateSampleXlsx(string outputPath)
     {
-        ConfigureLicense(allowTrial);
+        ConfigureLicense();
         using var engine = new ExcelEngine();
         engine.Excel.DefaultVersion = ExcelVersion.Xlsx;
         var book = engine.Excel.Workbooks.Create();
@@ -161,9 +163,9 @@ public static class DocumentCreator
 
     // Build a tiny PPTX with a single slide. Lets the samples run end-to-end without
     // shipping a binary fixture in the repository.
-    public static void CreateSamplePptx(string outputPath, bool allowTrial)
+    public static void CreateSamplePptx(string outputPath)
     {
-        ConfigureLicense(allowTrial);
+        ConfigureLicense();
         var deck = Presentation.Create();
         var slide = deck.Slides.Add(SlideLayoutType.Blank);
         var shape = slide.Shapes.AddTextBox(40, 40, 600, 80);
@@ -180,29 +182,30 @@ public static class DocumentCreator
     {
         string path = Path.GetFullPath(outputPath);
         Directory.CreateDirectory(Path.GetDirectoryName(path)!);
+        // FileMode.Create overwrites an existing file at the same path.
         return new FileStream(path, FileMode.Create, FileAccess.Write);
     }
 
-    // License registration is process-global and idempotent. Cache the result
-    // so high-volume callers (e.g. batch conversions) don't re-read the env
-    // variable and re-register on every operation.
+    // License registration is process-global. Cache the result so high-volume
+    // callers (e.g. batch conversions) don't re-read the env variable and
+    // re-register on every operation. The cache flag is only set once a key
+    // has actually been registered successfully; if no key is configured, the
+    // worker stays in trial mode and we keep the flag false so a key added
+    // later (e.g. via the process environment) can still take effect.
     private static bool s_licenseRegistered;
 
-    private static void ConfigureLicense(bool allowTrial)
+    private static void ConfigureLicense()
     {
         if (s_licenseRegistered) return;
-        s_licenseRegistered = true;
         string? key = Environment.GetEnvironmentVariable("SYNCFUSION_LICENSE_KEY");
-        if (!string.IsNullOrWhiteSpace(key))
+        if (string.IsNullOrWhiteSpace(key))
         {
-            SyncfusionLicenseProvider.RegisterLicense(key);
+            // No key: continue in trial mode. Syncfusion will add evaluation
+            // watermarks to the output documents. Leave s_licenseRegistered
+            // false so a key set later can still be picked up.
+            return;
         }
-        else if (!allowTrial)
-        {
-            // Reset the flag so a subsequent retry with allowTrial=true still works.
-            s_licenseRegistered = false;
-            throw new InvalidOperationException(
-                "Set SYNCFUSION_LICENSE_KEY or pass AllowTrial=true to evaluate without a license.");
-        }
+        SyncfusionLicenseProvider.RegisterLicense(key);
+        s_licenseRegistered = true;
     }
 }

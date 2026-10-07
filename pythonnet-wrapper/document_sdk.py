@@ -7,6 +7,10 @@ C# static methods natively without spawning separate processes.
 
 The public API mirrors the local .NET worker sample (``DocumentService``) so
 that the same caller code can be used with either approach.
+
+By default every operation runs in Syncfusion's **trial mode** (no license
+required). To use a real license, set the ``SYNCFUSION_LICENSE_KEY`` environment
+variable before importing this module; the C# worker picks it up automatically.
 """
 from __future__ import annotations
 
@@ -55,39 +59,39 @@ class DocumentService:
 
     # ---- Word: build from a string -------------------------------------------------
 
-    def create_docx(self, text: str, output: Path, allow_trial: bool = True) -> None:
+    def create_docx(self, text: str, output: Path) -> None:
         """Create a new Word document and save it as DOCX."""
-        self._creator.CreateDocx(str(text), str(output), bool(allow_trial))
+        self._creator.CreateDocx(str(text), str(output))
 
-    def create_pdf(self, text: str, output: Path, allow_trial: bool = True) -> None:
+    def create_pdf(self, text: str, output: Path) -> None:
         """Create a new Word document in memory and render it directly to PDF."""
-        self._creator.CreatePdf(str(text), str(output), bool(allow_trial))
+        self._creator.CreatePdf(str(text), str(output))
 
     # ---- Excel / PowerPoint: convert an existing file to PDF -----------------------
 
-    def excel_to_pdf(self, source: Path, output: Path, allow_trial: bool = True) -> None:
+    def excel_to_pdf(self, source: Path, output: Path) -> None:
         """Convert an XLSX workbook to PDF using its own print settings."""
-        self._creator.ExcelToPdf(str(source), str(output), bool(allow_trial))
+        self._creator.ExcelToPdf(str(source), str(output))
 
-    def powerpoint_to_pdf(self, source: Path, output: Path, allow_trial: bool = True) -> None:
+    def powerpoint_to_pdf(self, source: Path, output: Path) -> None:
         """Convert a PPTX presentation to PDF via Syncfusion's presentation renderer."""
-        self._creator.PowerPointToPdf(str(source), str(output), bool(allow_trial))
+        self._creator.PowerPointToPdf(str(source), str(output))
 
     # ---- PDF: overlay a diagonal text watermark on every page ----------------------
 
-    def watermark_pdf(self, source: Path, output: Path, label: str, allow_trial: bool = True) -> None:
+    def watermark_pdf(self, source: Path, output: Path, label: str) -> None:
         """Draw a translucent diagonal label on every page of an existing PDF."""
-        self._creator.WatermarkPdf(str(source), str(output), str(label), bool(allow_trial))
+        self._creator.WatermarkPdf(str(source), str(output), str(label))
 
     # ---- Sample input helpers -------------------------------------------------------
 
-    def create_sample_xlsx(self, output: Path, allow_trial: bool = True) -> None:
+    def create_sample_xlsx(self, output: Path) -> None:
         """Build a tiny XLSX so the samples run end-to-end without a binary fixture."""
-        self._creator.CreateSampleXlsx(str(output), bool(allow_trial))
+        self._creator.CreateSampleXlsx(str(output))
 
-    def create_sample_pptx(self, output: Path, allow_trial: bool = True) -> None:
+    def create_sample_pptx(self, output: Path) -> None:
         """Build a tiny PPTX so the samples run end-to-end without a binary fixture."""
-        self._creator.CreateSamplePptx(str(output), bool(allow_trial))
+        self._creator.CreateSamplePptx(str(output))
 
 
 def load_service(bundle: Path | None = None) -> DocumentService:
@@ -123,7 +127,6 @@ def main() -> None:
                         help="Text for create-docx / create-pdf.")
     parser.add_argument("--label", default="CONFIDENTIAL",
                         help="Label for watermark-pdf.")
-    parser.add_argument("--trial", action="store_true", help="Evaluate without a license key.")
     parser.add_argument("--bundle", type=Path, help="Folder containing the published DocumentBridge.")
     args = parser.parse_args()
 
@@ -142,7 +145,7 @@ def main() -> None:
             parser.error(f"Input file does not exist: {source}")
 
     service = load_service(args.bundle)
-    kwargs: dict = {"output": output, "allow_trial": args.trial}
+    kwargs: dict = {"output": output}
     if input_ext is not None:
         kwargs["source"] = source
     if method_name in ("create_docx", "create_pdf"):
