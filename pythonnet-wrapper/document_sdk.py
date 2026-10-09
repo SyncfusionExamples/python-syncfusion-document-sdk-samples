@@ -3,14 +3,10 @@ Python.NET (pythonnet).
 
 This module uses Python.NET to host CoreCLR inside the Python process and load
 the published DocumentBridge.dll directly. Python can then call DocumentCreator's
-C# static methods natively without spawning separate processes.
+methods natively without spawning separate processes.
 
 The public API mirrors the local .NET worker sample (``DocumentService``) so
 that the same caller code can be used with either approach.
-
-By default every operation runs in Syncfusion's **trial mode** (no license
-required). To use a real license, set the ``SYNCFUSION_LICENSE_KEY`` environment
-variable before importing this module; the C# worker picks it up automatically.
 """
 from __future__ import annotations
 
@@ -54,8 +50,11 @@ class DocumentService:
     so callers can swap between the two approaches without changing their code.
     """
 
-    def __init__(self, creator: type):
-        self._creator = creator
+    def __init__(self, creator_cls: type):
+
+        self._creator = creator_cls
+        
+        self._creator.ConfigureLicense()
 
     # ---- Word: build from a string -------------------------------------------------
 
@@ -101,8 +100,8 @@ def load_service(bundle: Path | None = None) -> DocumentService:
     ``runtime_config`` is not supported by Python.NET — restart the process.
     """
     bundle = Path(bundle or Path(__file__).parent / "artifacts").resolve()
-    creator = _load_clr_bridge(bundle)
-    return DocumentService(creator)
+    creator_cls = _load_clr_bridge(bundle)
+    return DocumentService(creator_cls)
 
 
 # Each CLI subcommand maps to one DocumentService method. Tuple shape:

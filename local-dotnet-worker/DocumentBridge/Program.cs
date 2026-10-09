@@ -21,6 +21,9 @@ try
     if (string.IsNullOrWhiteSpace(request.Output))
         throw new ArgumentException("Request is missing 'Output'.");
 
+    DocumentCreator.ConfigureLicense();
+
+    
     switch (request.Operation)
     {
         // Word: build from a string.
@@ -76,8 +79,7 @@ static void RequireField(string? value, string name, string operation)
 // Shape of the JSON payload sent by document_sdk.py over standard input.
 // `Operation` selects the C# entry point. `Input` is required for file -> file
 // operations; `Text` is required for create-* operations; `Label` is required
-// for watermark-pdf. License registration is driven entirely by the
-// SYNCFUSION_LICENSE_KEY environment variable.
+// for watermark-pdf.
 internal sealed record Request(
     string Operation,
     string? Text,
