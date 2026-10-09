@@ -4,7 +4,7 @@ local .NET worker.
 This module launches the published DocumentBridge as a separate process via
 Python's built-in `subprocess` module. No pip packages, Python.NET, or a web
 server are required. Works with standard Python on any platform that has
-the .NET 8 runtime installed.
+the .NET 10 runtime installed.
 """
 import argparse
 import json
@@ -112,7 +112,7 @@ def load_service(bundle: Path | None = None) -> DocumentService:
 
     dotnet = shutil.which("dotnet")
     if dotnet is None:
-        raise RuntimeError("Install the .NET 8 runtime/SDK and put dotnet on PATH.")
+        raise RuntimeError("Install the .NET 10 runtime/SDK and put dotnet on PATH.")
 
     return DocumentService([dotnet, str(dll)])
 

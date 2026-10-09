@@ -10,7 +10,7 @@ Microsoft Office is **not** required. All document processing runs locally.
 
 Ensure the following prerequisites are installed:
 
-- **[.NET 10.0 LTS SDK](https://dotnet.microsoft.com/download/dotnet/10.0)** (or .NET 8.0+)
+- **[.NET 10.0 LTS SDK](https://dotnet.microsoft.com/download/dotnet/10.0)**
 - **[Python 3.9+](https://www.python.org/downloads/)**
 - **Syncfusion .NET Document SDK packages:**
   - `Syncfusion.DocIORenderer.Net.Core`

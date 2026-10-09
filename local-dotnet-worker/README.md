@@ -1,6 +1,6 @@
 # Local .NET Worker Sample
 
-Creates Word, Excel, PowerPoint, and PDF documents from Python by spawning a local .NET process (`DocumentBridge`) via `subprocess`. Requires only standard Python and the .NET 8 runtime — no pip packages needed.
+Creates Word, Excel, PowerPoint, and PDF documents from Python by spawning a local .NET process (`DocumentBridge`) via `subprocess`. Requires only standard Python and the .NET 10 runtime — no pip packages needed.
 
 ## Quickstart
 
