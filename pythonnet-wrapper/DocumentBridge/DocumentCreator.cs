@@ -14,20 +14,20 @@ using Syncfusion.Drawing;
 namespace DocumentInterop;
 
 /// <summary>
-/// Exposed to Python via Python.NET (pythonnet). Both instance and static methods
-/// are provided for flexibility.
+/// Exposed to Python via Python.NET (pythonnet). 
 /// </summary>
-public class DocumentCreator
+public static class DocumentCreator
 {
     private static readonly object s_lock = new();
     private static bool s_licenseRegistered;
 
-    public DocumentCreator()
+    static DocumentCreator()
     {
         ConfigureLicense();
     }
 
-    private static void ConfigureLicense()
+
+    public static void ConfigureLicense()
     {
         if (s_licenseRegistered) return;
         lock (s_lock)
@@ -42,24 +42,18 @@ public class DocumentCreator
         }
     }
 
-    // Default singleton instance used for static delegations
-    private static readonly DocumentCreator s_default = new();
-
     // ---- Word: build from a string ----------------------------------------------------
 
     // Build a new Word document and save it directly as DOCX.
-    public void CreateDocx(string text, string outputPath)
+    public static void CreateDocx(string text, string outputPath)
     {
         using var document = CreateDocument(text);
         using var output = OpenOutput(outputPath);
         document.Save(output, Syncfusion.DocIO.FormatType.Docx);
     }
 
-    public static void CreateDocxStatic(string text, string outputPath) =>
-        s_default.CreateDocx(text, outputPath);
-
     // Build a new Word document and render it straight to PDF via DocIORenderer.
-    public void CreatePdf(string text, string outputPath)
+    public static void CreatePdf(string text, string outputPath)
     {
         using var document = CreateDocument(text);
         using var renderer = new DocIORenderer();
@@ -67,9 +61,6 @@ public class DocumentCreator
         using var output = OpenOutput(outputPath);
         pdf.Save(output);
     }
-
-    public static void CreatePdfStatic(string text, string outputPath) =>
-        s_default.CreatePdf(text, outputPath);
 
     private static WordDocument CreateDocument(string text)
     {
@@ -85,7 +76,7 @@ public class DocumentCreator
     // ---- Excel: convert an existing XLSX file to PDF ----------------------------------
 
     // Convert an XLSX workbook to PDF using its own print settings.
-    public void ExcelToPdf(string inputPath, string outputPath)
+    public static void ExcelToPdf(string inputPath, string outputPath)
     {
         if (!File.Exists(inputPath))
             throw new FileNotFoundException("Input workbook not found.", inputPath);
@@ -103,13 +94,10 @@ public class DocumentCreator
         finally { book.Close(); }
     }
 
-    public static void ExcelToPdfStatic(string inputPath, string outputPath) =>
-        s_default.ExcelToPdf(inputPath, outputPath);
-
     // ---- PowerPoint: convert an existing PPTX file to PDF -----------------------------
 
     // Convert a PPTX presentation to PDF using Syncfusion's presentation renderer.
-    public void PowerPointToPdf(string inputPath, string outputPath)
+    public static void PowerPointToPdf(string inputPath, string outputPath)
     {
         if (!File.Exists(inputPath))
             throw new FileNotFoundException("Input presentation not found.", inputPath);
@@ -120,13 +108,10 @@ public class DocumentCreator
         pdf.Save(output);
     }
 
-    public static void PowerPointToPdfStatic(string inputPath, string outputPath) =>
-        s_default.PowerPointToPdf(inputPath, outputPath);
-
     // ---- PDF: overlay a diagonal text watermark on every page -------------------------
 
     // Draw a translucent diagonal label on every page of an existing PDF.
-    public void WatermarkPdf(string inputPath, string outputPath, string label)
+    public static void WatermarkPdf(string inputPath, string outputPath, string label)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(label);
         if (!File.Exists(inputPath))
@@ -163,14 +148,11 @@ public class DocumentCreator
         document.Save(output);
     }
 
-    public static void WatermarkPdfStatic(string inputPath, string outputPath, string label) =>
-        s_default.WatermarkPdf(inputPath, outputPath, label);
-
     // ---- Sample input helpers (used only by the sample scripts) -----------------------
 
     // Build a tiny XLSX with one cell of text. Lets the samples run end-to-end without
     // shipping a binary fixture in the repository.
-    public void CreateSampleXlsx(string outputPath)
+    public static void CreateSampleXlsx(string outputPath)
     {
         using var engine = new ExcelEngine();
         engine.Excel.DefaultVersion = ExcelVersion.Xlsx;
@@ -187,12 +169,9 @@ public class DocumentCreator
         finally { book.Close(); }
     }
 
-    public static void CreateSampleXlsxStatic(string outputPath) =>
-        s_default.CreateSampleXlsx(outputPath);
-
     // Build a tiny PPTX with a single slide. Lets the samples run end-to-end without
     // shipping a binary fixture in the repository.
-    public void CreateSamplePptx(string outputPath)
+    public static void CreateSamplePptx(string outputPath)
     {
         var deck = Presentation.Create();
         var slide = deck.Slides.Add(SlideLayoutType.Blank);
@@ -203,9 +182,6 @@ public class DocumentCreator
         using var output = OpenOutput(outputPath);
         deck.Save(output);
     }
-
-    public static void CreateSamplePptxStatic(string outputPath) =>
-        s_default.CreateSamplePptx(outputPath);
 
     // ---- Common helpers ---------------------------------------------------------------
 

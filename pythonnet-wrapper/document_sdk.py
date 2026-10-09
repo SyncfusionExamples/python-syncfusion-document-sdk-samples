@@ -50,8 +50,11 @@ class DocumentService:
     so callers can swap between the two approaches without changing their code.
     """
 
-    def __init__(self, creator: type):
-        self._creator = creator
+    def __init__(self, creator_cls: type):
+
+        self._creator = creator_cls
+        
+        self._creator.ConfigureLicense()
 
     # ---- Word: build from a string -------------------------------------------------
 
@@ -98,8 +101,7 @@ def load_service(bundle: Path | None = None) -> DocumentService:
     """
     bundle = Path(bundle or Path(__file__).parent / "artifacts").resolve()
     creator_cls = _load_clr_bridge(bundle)
-    creator = creator_cls()
-    return DocumentService(creator)
+    return DocumentService(creator_cls)
 
 
 # Each CLI subcommand maps to one DocumentService method. Tuple shape:

@@ -21,40 +21,41 @@ try
     if (string.IsNullOrWhiteSpace(request.Output))
         throw new ArgumentException("Request is missing 'Output'.");
 
-    var creator = new DocumentCreator();
+    DocumentCreator.ConfigureLicense();
 
+    
     switch (request.Operation)
     {
         // Word: build from a string.
         case "create-docx":
             RequireField(request.Text, "Text", "create-docx");
-            creator.CreateDocx(request.Text!, request.Output);
+            DocumentCreator.CreateDocx(request.Text!, request.Output);
             break;
         case "create-pdf":
             RequireField(request.Text, "Text", "create-pdf");
-            creator.CreatePdf(request.Text!, request.Output);
+            DocumentCreator.CreatePdf(request.Text!, request.Output);
             break;
         // Excel / PowerPoint: convert an existing file to PDF.
         case "excel-to-pdf":
             RequireField(request.Input, "Input", "excel-to-pdf");
-            creator.ExcelToPdf(request.Input!, request.Output);
+            DocumentCreator.ExcelToPdf(request.Input!, request.Output);
             break;
         case "powerpoint-to-pdf":
             RequireField(request.Input, "Input", "powerpoint-to-pdf");
-            creator.PowerPointToPdf(request.Input!, request.Output);
+            DocumentCreator.PowerPointToPdf(request.Input!, request.Output);
             break;
         // PDF: overlay a diagonal text watermark on every page.
         case "watermark-pdf":
             RequireField(request.Input, "Input", "watermark-pdf");
             RequireField(request.Label, "Label", "watermark-pdf");
-            creator.WatermarkPdf(request.Input!, request.Output, request.Label!);
+            DocumentCreator.WatermarkPdf(request.Input!, request.Output, request.Label!);
             break;
         // Sample input helpers used by the Python sample scripts.
         case "create-sample-xlsx":
-            creator.CreateSampleXlsx(request.Output);
+            DocumentCreator.CreateSampleXlsx(request.Output);
             break;
         case "create-sample-pptx":
-            creator.CreateSamplePptx(request.Output);
+            DocumentCreator.CreateSamplePptx(request.Output);
             break;
         default:
             throw new ArgumentException("Unknown operation: " + request.Operation);
