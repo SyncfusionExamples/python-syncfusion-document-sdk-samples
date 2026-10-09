@@ -39,8 +39,8 @@ public static class DocumentCreator
             if (!string.IsNullOrWhiteSpace(key))
             {
                 SyncfusionLicenseProvider.RegisterLicense(key);
+                s_licenseRegistered = true;
             }
-            s_licenseRegistered = true;
         }
     }
 
