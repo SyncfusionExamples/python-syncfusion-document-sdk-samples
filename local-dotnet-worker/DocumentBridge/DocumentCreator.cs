@@ -19,29 +19,59 @@ namespace DocumentInterop;
 /// onto every page of an existing PDF. Each entry point is independent; PDF
 /// operations never write an intermediate DOCX/PPTX.
 /// </summary>
-public static class DocumentCreator
+public class DocumentCreator
 {
+    private static readonly object s_lock = new();
+    private static bool s_licenseRegistered;
+
+    public DocumentCreator()
+    {
+        ConfigureLicense();
+    }
+
+    private static void ConfigureLicense()
+    {
+        if (s_licenseRegistered) return;
+        lock (s_lock)
+        {
+            if (s_licenseRegistered) return;
+            string? key = Environment.GetEnvironmentVariable("SYNCFUSION_LICENSE_KEY");
+            if (!string.IsNullOrWhiteSpace(key))
+            {
+                SyncfusionLicenseProvider.RegisterLicense(key);
+            }
+            s_licenseRegistered = true;
+        }
+    }
+
+    // Default singleton instance used for static delegations
+    private static readonly DocumentCreator s_default = new();
+
     // ---- Word: build from a string ----------------------------------------------------
 
     // Build a new Word document and save it directly as DOCX.
-    public static void CreateDocx(string text, string outputPath)
+    public void CreateDocx(string text, string outputPath)
     {
-        ConfigureLicense();
         using var document = CreateDocument(text);
         using var output = OpenOutput(outputPath);
         document.Save(output, Syncfusion.DocIO.FormatType.Docx);
     }
 
+    public static void CreateDocxStatic(string text, string outputPath) =>
+        s_default.CreateDocx(text, outputPath);
+
     // Build a new Word document and render it straight to PDF via DocIORenderer.
-    public static void CreatePdf(string text, string outputPath)
+    public void CreatePdf(string text, string outputPath)
     {
-        ConfigureLicense();
         using var document = CreateDocument(text);
         using var renderer = new DocIORenderer();
         using var pdf = renderer.ConvertToPDF(document);
         using var output = OpenOutput(outputPath);
         pdf.Save(output);
     }
+
+    public static void CreatePdfStatic(string text, string outputPath) =>
+        s_default.CreatePdf(text, outputPath);
 
     private static WordDocument CreateDocument(string text)
     {
@@ -57,9 +87,8 @@ public static class DocumentCreator
     // ---- Excel: convert an existing XLSX file to PDF ----------------------------------
 
     // Convert an XLSX workbook to PDF using its own print settings.
-    public static void ExcelToPdf(string inputPath, string outputPath)
+    public void ExcelToPdf(string inputPath, string outputPath)
     {
-        ConfigureLicense();
         if (!File.Exists(inputPath))
             throw new FileNotFoundException("Input workbook not found.", inputPath);
         using var engine = new ExcelEngine();
@@ -76,12 +105,14 @@ public static class DocumentCreator
         finally { book.Close(); }
     }
 
+    public static void ExcelToPdfStatic(string inputPath, string outputPath) =>
+        s_default.ExcelToPdf(inputPath, outputPath);
+
     // ---- PowerPoint: convert an existing PPTX file to PDF -----------------------------
 
     // Convert a PPTX presentation to PDF using Syncfusion's presentation renderer.
-    public static void PowerPointToPdf(string inputPath, string outputPath)
+    public void PowerPointToPdf(string inputPath, string outputPath)
     {
-        ConfigureLicense();
         if (!File.Exists(inputPath))
             throw new FileNotFoundException("Input presentation not found.", inputPath);
         using var stream = File.OpenRead(inputPath);
@@ -91,12 +122,14 @@ public static class DocumentCreator
         pdf.Save(output);
     }
 
+    public static void PowerPointToPdfStatic(string inputPath, string outputPath) =>
+        s_default.PowerPointToPdf(inputPath, outputPath);
+
     // ---- PDF: overlay a diagonal text watermark on every page -------------------------
 
     // Draw a translucent diagonal label on every page of an existing PDF.
-    public static void WatermarkPdf(string inputPath, string outputPath, string label)
+    public void WatermarkPdf(string inputPath, string outputPath, string label)
     {
-        ConfigureLicense();
         ArgumentException.ThrowIfNullOrWhiteSpace(label);
         if (!File.Exists(inputPath))
             throw new FileNotFoundException("Input PDF not found.", inputPath);
@@ -132,13 +165,15 @@ public static class DocumentCreator
         document.Save(output);
     }
 
+    public static void WatermarkPdfStatic(string inputPath, string outputPath, string label) =>
+        s_default.WatermarkPdf(inputPath, outputPath, label);
+
     // ---- Sample input helpers (used only by the sample scripts) -----------------------
 
     // Build a tiny XLSX with one cell of text. Lets the samples run end-to-end without
     // shipping a binary fixture in the repository.
-    public static void CreateSampleXlsx(string outputPath)
+    public void CreateSampleXlsx(string outputPath)
     {
-        ConfigureLicense();
         using var engine = new ExcelEngine();
         engine.Excel.DefaultVersion = ExcelVersion.Xlsx;
         var book = engine.Excel.Workbooks.Create();
@@ -147,27 +182,32 @@ public static class DocumentCreator
             var sheet = book.Worksheets[0];
             sheet.Range["A1"].Text = "Sample workbook";
             sheet.Range["A1"].CellStyle.Font.Bold = true;
-            sheet.Range["A3"].Text = "Hello from the local .NET worker!";
+            sheet.Range["A3"].Text = "Hello from Syncfusion Document SDK!";
             using var output = OpenOutput(outputPath);
             book.SaveAs(output);
         }
         finally { book.Close(); }
     }
 
+    public static void CreateSampleXlsxStatic(string outputPath) =>
+        s_default.CreateSampleXlsx(outputPath);
+
     // Build a tiny PPTX with a single slide. Lets the samples run end-to-end without
     // shipping a binary fixture in the repository.
-    public static void CreateSamplePptx(string outputPath)
+    public void CreateSamplePptx(string outputPath)
     {
-        ConfigureLicense();
         var deck = Presentation.Create();
         var slide = deck.Slides.Add(SlideLayoutType.Blank);
         var shape = slide.Shapes.AddTextBox(40, 40, 600, 80);
-        var paragraph = shape.TextBody.AddParagraph("Hello from the local .NET worker!");
+        var paragraph = shape.TextBody.AddParagraph("Hello from Syncfusion Document SDK!");
         paragraph.Font.FontSize = 28;
         paragraph.Font.Bold = true;
         using var output = OpenOutput(outputPath);
         deck.Save(output);
     }
+
+    public static void CreateSamplePptxStatic(string outputPath) =>
+        s_default.CreateSamplePptx(outputPath);
 
     // ---- Common helpers ---------------------------------------------------------------
 
@@ -177,28 +217,5 @@ public static class DocumentCreator
         Directory.CreateDirectory(Path.GetDirectoryName(path)!);
         // FileMode.Create overwrites an existing file at the same path.
         return new FileStream(path, FileMode.Create, FileAccess.Write);
-    }
-
-    // License registration is process-global. Cache the result so high-volume
-    // callers (e.g. batch conversions) don't re-read the env variable and
-    // re-register on every operation. The cache flag is only set once a key
-    // has actually been registered successfully; if no key is configured, the
-    // worker stays in trial mode and we keep the flag false so a key added
-    // later (e.g. via the process environment) can still take effect.
-    private static bool s_licenseRegistered;
-
-    private static void ConfigureLicense()
-    {
-        if (s_licenseRegistered) return;
-        string? key = Environment.GetEnvironmentVariable("SYNCFUSION_LICENSE_KEY");
-        if (string.IsNullOrWhiteSpace(key))
-        {
-            // No key: continue in trial mode. Syncfusion will add evaluation
-            // watermarks to the output documents. Leave s_licenseRegistered
-            // false so a key set later can still be picked up.
-            return;
-        }
-        SyncfusionLicenseProvider.RegisterLicense(key);
-        s_licenseRegistered = true;
     }
 }

@@ -1,140 +1,103 @@
 # Python + Syncfusion Document SDK Samples
 
-This repository contains two complete, runnable samples demonstrating how to generate Word (`.docx`) documents and convert them to PDF using the **Syncfusion .NET Document SDK** (DocIO and DocIORenderer) from **Python 3.9+**.
+A simple, fast solution for creating Word (`.docx`), Excel (`.xlsx`), PowerPoint (`.pptx`), and PDF documents from **Python** using the **Syncfusion .NET Document SDK**.
 
-Microsoft Office is **not** required. All document generation and PDF rendering run locally.
-
-## Two Approaches
-
-| Feature | Approach 1: Local .NET Worker | Approach 2: Python.NET Wrapper |
-|---|---|---|
-| **Location** | [`local-dotnet-worker/`](local-dotnet-worker/) | [`pythonnet-wrapper/`](pythonnet-wrapper/) |
-| **How it connects** | Separate process spawned via standard `subprocess` | In-process via Python.NET (`pythonnet` CoreCLR host) |
-| **Python requirements** | Python 3.9+, **zero pip packages** | Python 3.12 (or 3.9+ with compatible CPython), `pythonnet>=3.1.0` |
-| **.NET requirements** | .NET 8 SDK (build), .NET 8 Runtime | .NET 8 SDK (build), .NET 8 Runtime |
-| **IPC mechanism** | JSON over standard input (`stdin`) | Direct managed memory function calls |
-| **Best for** | Strict Python environments, batch jobs, CLI tools, maximum isolation | High-frequency calls, latency-sensitive workflows |
+Microsoft Office is **not** required. All document processing runs locally.
 
 ---
 
-## Approach Documentation
+## Prerequisites
 
-The two approaches are **independent self-contained samples**. Pick one and read its `README.md`; the table below links to each:
+Ensure the following prerequisites are installed:
 
-| Approach | Quickstart README | Python client |
-|---|---|---|
-| Local .NET Worker | [local-dotnet-worker/README.md](local-dotnet-worker/README.md) | [local-dotnet-worker/document_sdk.py](local-dotnet-worker/document_sdk.py) |
-| Python.NET Wrapper | [pythonnet-wrapper/README.md](pythonnet-wrapper/README.md) | [pythonnet-wrapper/document_sdk.py](pythonnet-wrapper/document_sdk.py) |
-
-Both clients expose the same public surface (`load_service()` returning a `DocumentService` with `create_docx`, `create_pdf`, `excel_to_pdf`, `powerpoint_to_pdf`, `watermark_pdf`, and two sample-input helpers), so the same caller code works with either approach. For the C# side, see the `DocumentBridge/` folder inside each approach.
-
----
-
-## Samples
-
-Every approach ships with a small `samples/` folder of runnable scripts that build on `document_sdk.load_service()`:
-
-| Sample | Local Worker | Python.NET |
-|---|---|---|
-| 01 — Hello World (DOCX + PDF) | [link](local-dotnet-worker/samples/01_hello_world.py) | [link](pythonnet-wrapper/samples/01_hello_world.py) |
-| 02 — Batch generation loop | [link](local-dotnet-worker/samples/02_batch_invoices.py) | [link](pythonnet-wrapper/samples/02_batch_invoices.py) |
-| 03 — Custom output paths & bundle | [link](local-dotnet-worker/samples/03_custom_output_paths.py) | [link](pythonnet-wrapper/samples/03_custom_output_paths.py) |
-| 04 — Excel → PDF | [link](local-dotnet-worker/samples/04_excel_to_pdf.py) | [link](pythonnet-wrapper/samples/04_excel_to_pdf.py) |
-| 05 — PowerPoint → PDF | [link](local-dotnet-worker/samples/05_powerpoint_to_pdf.py) | [link](pythonnet-wrapper/samples/05_powerpoint_to_pdf.py) |
-| 06 — PDF watermark | [link](local-dotnet-worker/samples/06_watermark_pdf.py) | [link](pythonnet-wrapper/samples/06_watermark_pdf.py) |
-| Per-approach index | [local-dotnet-worker/samples/README.md](local-dotnet-worker/samples/README.md) | [pythonnet-wrapper/samples/README.md](pythonnet-wrapper/samples/README.md) |
-
-Run a sample (example, local worker):
-
-```bash
-cd local-dotnet-worker
-python -m samples.01_hello_world
-```
-
-> Samples are run as modules (`python -m samples.XX`) so the parent folder
-> containing `document_sdk.py` is on `sys.path`. Running them as plain
-> scripts (`python samples/XX.py`) fails with
-> `ModuleNotFoundError: No module named 'document_sdk'`.
+- **[.NET 10.0 LTS SDK](https://dotnet.microsoft.com/download/dotnet/10.0)** (or .NET 8.0+)
+- **[Python 3.9+](https://www.python.org/downloads/)**
+- **Syncfusion .NET Document SDK packages:**
+  - `Syncfusion.DocIORenderer.Net.Core`
+  - `Syncfusion.XlsIORenderer.Net.Core`
+  - `Syncfusion.PresentationRenderer.Net.Core`
+  - `Syncfusion.Pdf.Net.Core`
 
 ---
 
-## Quick Tour
+## Quickstart
 
-### Approach 1: Local .NET Worker (`local-dotnet-worker/`)
+Choose either approach based on your needs:
 
-```bash
-cd local-dotnet-worker
-
-# 1. Publish the .NET worker (Windows x64 example)
-dotnet publish DocumentBridge/DocumentBridge.csproj -c Release -r win-x64 --self-contained false -o artifacts
-
-# 2. Run with plain Python (creates output/Sample.docx)
-python document_sdk.py create-docx
-
-# 3. Render directly to PDF without an intermediate DOCX
-python document_sdk.py create-pdf
-
-# 4. Convert an existing XLSX/PPTX file to PDF, or watermark a PDF
-python document_sdk.py excel-to-pdf      --input documents/input.xlsx --output output/workbook.pdf
-python document_sdk.py powerpoint-to-pdf --input documents/input.pptx --output output/slides.pdf
-python document_sdk.py watermark-pdf     --input output/workbook.pdf  --output output/watermarked.pdf --label CONFIDENTIAL
-```
-
-### Approach 2: Python.NET Wrapper (`pythonnet-wrapper/`)
-
-```bash
-cd pythonnet-wrapper
-
-# 1. Publish the .NET class library
-dotnet publish DocumentBridge/DocumentBridge.csproj -c Release -r win-x64 --self-contained false -o artifacts
-
-# 2. Install pythonnet in a virtual environment
-python -m venv .venv
-.venv\Scripts\activate      # On Linux/macOS: source .venv/bin/activate
-pip install -r requirements.txt
-
-# 3. Run in-process
-python document_sdk.py create-docx
-python document_sdk.py create-pdf
-
-# 4. Convert an existing XLSX/PPTX file to PDF, or watermark a PDF
-python document_sdk.py excel-to-pdf      --input documents/input.xlsx --output output/workbook.pdf
-python document_sdk.py powerpoint-to-pdf --input documents/input.pptx --output output/slides.pdf
-python document_sdk.py watermark-pdf     --input output/workbook.pdf  --output output/watermarked.pdf --label CONFIDENTIAL
-```
+| Approach | Folder | Best For | Python Packages |
+|---|---|---|---|
+| **Approach 1: Local .NET Worker** | [`local-dotnet-worker/`](local-dotnet-worker/) | Subprocess isolation, CLI workflows | **Zero pip packages** |
+| **Approach 2: Python.NET Wrapper** | [`pythonnet-wrapper/`](pythonnet-wrapper/) | In-process execution, high-performance loops | `pip install pythonnet` (if not installed) |
 
 ---
 
-## Licensing & Evaluation
+### Approach 1: Local .NET Worker (Zero Pip Dependencies)
 
-Both samples run in Syncfusion's **trial mode by default** — no license flag is
-required, and no Python method takes one. Evaluation watermarks are added to
-the output documents in this mode.
+1. **Navigate and publish the .NET worker:**
+   ```bash
+   cd local-dotnet-worker
+   dotnet publish DocumentBridge/DocumentBridge.csproj -c Release -r win-x64 --self-contained false -o artifacts
+   ```
 
-For licensed production use, set the `SYNCFUSION_LICENSE_KEY` environment
-variable before running the command. The .NET code reads the variable via
-`Environment.GetEnvironmentVariable("SYNCFUSION_LICENSE_KEY")` and registers
-it via `SyncfusionLicenseProvider.RegisterLicense(key)`. Keys are never
-passed on the command line.
+2. **Generate documents via CLI:**
+   ```bash
+   python document_sdk.py create-docx
+   python document_sdk.py create-pdf
+   ```
 
-```bash
-# Windows PowerShell
-$env:SYNCFUSION_LICENSE_KEY="YOUR_KEY_HERE"
-
-# Linux / macOS
-export SYNCFUSION_LICENSE_KEY="YOUR_KEY_HERE"
-
-# Then run any sample as usual — no extra flag is needed.
-python document_sdk.py create-pdf
-```
+3. **Run samples:**
+   ```bash
+   python -m samples.01_hello_world
+   python -m samples.02_batch_invoices
+   python -m samples.04_excel_to_pdf
+   python -m samples.05_powerpoint_to_pdf
+   python -m samples.06_watermark_pdf
+   ```
 
 ---
 
-## Tested Configurations
+### Approach 2: Python.NET Wrapper (In-Process Execution)
 
-- **.NET SDK:** .NET 8.0 LTS
-- **Syncfusion Packages:** `Syncfusion.DocIORenderer.Net.Core`, `Syncfusion.XlsIORenderer.Net.Core`, `Syncfusion.PresentationRenderer.Net.Core`, `Syncfusion.Pdf.Net.Core` (all 34.2.5)
-- **Python:** 3.9.6, 3.12.x
-- **Platforms:** Windows 10/11 x64 (`win-x64`), macOS Apple Silicon (`osx-arm64`), Linux Ubuntu x64 (`linux-x64`)
+1. **Navigate and publish the class library:**
+   ```bash
+   cd pythonnet-wrapper
+   dotnet publish DocumentBridge/DocumentBridge.csproj -c Release -r win-x64 --self-contained false -o artifacts
+   ```
 
-For the C# implementation, see [`local-dotnet-worker/DocumentBridge/`](local-dotnet-worker/DocumentBridge/) and [`pythonnet-wrapper/DocumentBridge/`](pythonnet-wrapper/DocumentBridge/).
+2. **Install pythonnet (only if not already installed):**
+   ```bash
+   pip install pythonnet
+   ```
+   *(Skip this step if `pythonnet` is already installed in your Python environment).*
+
+3. **Generate documents via CLI:**
+   ```bash
+   python document_sdk.py create-docx
+   python document_sdk.py create-pdf
+   ```
+
+4. **Run samples:**
+   ```bash
+   python -m samples.01_hello_world
+   python -m samples.02_batch_invoices
+   python -m samples.04_excel_to_pdf
+   python -m samples.05_powerpoint_to_pdf
+   python -m samples.06_watermark_pdf
+   ```
+
+> **Platform Note:** If running on non-Windows platforms, replace `-r win-x64` with `-r linux-x64`, `-r osx-arm64`, or `-r osx-x64`.
+
+---
+
+## Samples Overview
+
+Both approaches include the same self-contained samples:
+
+| Sample | Description |
+|---|---|
+| `01_hello_world.py` | Create a Word document and direct PDF |
+| `02_batch_invoices.py` | Generate multiple documents in a loop |
+| `03_custom_output_paths.py` | Specify custom output and bundle paths |
+| `04_excel_to_pdf.py` | Convert an Excel workbook to PDF |
+| `05_powerpoint_to_pdf.py` | Convert a PowerPoint presentation to PDF |
+| `06_watermark_pdf.py` | Apply a text watermark to PDF pages |

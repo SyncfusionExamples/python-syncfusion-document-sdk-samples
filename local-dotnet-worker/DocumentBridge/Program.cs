@@ -21,38 +21,40 @@ try
     if (string.IsNullOrWhiteSpace(request.Output))
         throw new ArgumentException("Request is missing 'Output'.");
 
+    var creator = new DocumentCreator();
+
     switch (request.Operation)
     {
         // Word: build from a string.
         case "create-docx":
             RequireField(request.Text, "Text", "create-docx");
-            DocumentCreator.CreateDocx(request.Text!, request.Output);
+            creator.CreateDocx(request.Text!, request.Output);
             break;
         case "create-pdf":
             RequireField(request.Text, "Text", "create-pdf");
-            DocumentCreator.CreatePdf(request.Text!, request.Output);
+            creator.CreatePdf(request.Text!, request.Output);
             break;
         // Excel / PowerPoint: convert an existing file to PDF.
         case "excel-to-pdf":
             RequireField(request.Input, "Input", "excel-to-pdf");
-            DocumentCreator.ExcelToPdf(request.Input!, request.Output);
+            creator.ExcelToPdf(request.Input!, request.Output);
             break;
         case "powerpoint-to-pdf":
             RequireField(request.Input, "Input", "powerpoint-to-pdf");
-            DocumentCreator.PowerPointToPdf(request.Input!, request.Output);
+            creator.PowerPointToPdf(request.Input!, request.Output);
             break;
         // PDF: overlay a diagonal text watermark on every page.
         case "watermark-pdf":
             RequireField(request.Input, "Input", "watermark-pdf");
             RequireField(request.Label, "Label", "watermark-pdf");
-            DocumentCreator.WatermarkPdf(request.Input!, request.Output, request.Label!);
+            creator.WatermarkPdf(request.Input!, request.Output, request.Label!);
             break;
         // Sample input helpers used by the Python sample scripts.
         case "create-sample-xlsx":
-            DocumentCreator.CreateSampleXlsx(request.Output);
+            creator.CreateSampleXlsx(request.Output);
             break;
         case "create-sample-pptx":
-            DocumentCreator.CreateSamplePptx(request.Output);
+            creator.CreateSamplePptx(request.Output);
             break;
         default:
             throw new ArgumentException("Unknown operation: " + request.Operation);
@@ -76,8 +78,7 @@ static void RequireField(string? value, string name, string operation)
 // Shape of the JSON payload sent by document_sdk.py over standard input.
 // `Operation` selects the C# entry point. `Input` is required for file -> file
 // operations; `Text` is required for create-* operations; `Label` is required
-// for watermark-pdf. License registration is driven entirely by the
-// SYNCFUSION_LICENSE_KEY environment variable.
+// for watermark-pdf.
 internal sealed record Request(
     string Operation,
     string? Text,

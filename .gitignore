@@ -6,8 +6,6 @@ artifacts/
 # Python
 __pycache__/
 *.pyc
-.venv/
-venv/
 
 # Sample output
 output/

@@ -1,15 +1,10 @@
 """Create Word, Excel, and PowerPoint documents and convert them to PDF using a
 local .NET worker.
 
-This module launches the published DocumentBridge.dll as a separate process via
+This module launches the published DocumentBridge as a separate process via
 Python's built-in `subprocess` module. No pip packages, Python.NET, or a web
-server are required. Works with plain Python 3.9+ on any platform that has
+server are required. Works with standard Python on any platform that has
 the .NET 8 runtime installed.
-
-By default every operation runs in Syncfusion's **trial mode** (no license
-required). To use a real license, set the ``SYNCFUSION_LICENSE_KEY`` environment
-variable before invoking the worker; the worker picks it up automatically and
-Python callers do not need to change.
 """
 import argparse
 import json
@@ -28,15 +23,10 @@ class DocumentService:
         # Default is generous because large PPTX/XLSX -> PDF conversions can
         # easily exceed a minute. Callers can override per-instance.
         self._timeout = timeout
-        # The .NET worker reads SYNCFUSION_LICENSE_KEY from the environment
-        # on first use. If unset, it runs in Syncfusion's trial mode
-        # (evaluation watermarks are added to the output).
 
     def _call(self, operation: str, output: Path, *,
               text: str | None = None, input: Path | None = None,
               label: str | None = None) -> None:
-        # The .NET worker reads SYNCFUSION_LICENSE_KEY from the environment,
-        # so we do not need to forward a trial flag per call.
         request = {
             "Operation": operation,
             "Text": text,
@@ -105,8 +95,7 @@ def load_service(bundle: Path | None = None) -> DocumentService:
     """Locate the published worker executable or dll.
 
     When built with <UseAppHost>true</UseAppHost>, the native apphost executable
-    (DocumentBridge.exe on Windows, DocumentBridge on Unix) is preferred so
-    Syncfusion's evaluation/trial watermarking triggers properly.
+    (DocumentBridge.exe on Windows, DocumentBridge on Unix) is used directly.
     Falls back to `dotnet DocumentBridge.dll` if the native host is absent.
     """
     bundle = Path(bundle or Path(__file__).parent / "artifacts").resolve()

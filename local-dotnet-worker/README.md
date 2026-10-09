@@ -1,75 +1,50 @@
 # Local .NET Worker Sample
 
-Creates a Word document from Python and converts it to PDF by spawning a local, self-contained .NET process (`DocumentBridge.dll`) via `subprocess`. No Python.NET, no pip packages, no web server.
+Creates Word, Excel, PowerPoint, and PDF documents from Python by spawning a local .NET process (`DocumentBridge`) via `subprocess`. Requires only standard Python and the .NET 8 runtime — no pip packages needed.
 
-## Layout
+## Quickstart
 
-```text
-local-dotnet-worker/
-  document_sdk.py        # Python client (stdlib only)
-  NuGet.Config
-  DocumentBridge/
-    DocumentBridge.csproj    # .NET 8 executable project
-    DocumentCreator.cs   # DocIO/XlsIO/Presentation/Pdf logic
-    Program.cs           # stdin JSON -> operation dispatcher
-  samples/               # Runnable end-to-end examples
-    README.md
-    01_hello_world.py
-    02_batch_invoices.py
-    03_custom_output_paths.py
-    04_excel_to_pdf.py
-    05_powerpoint_to_pdf.py
-    06_watermark_pdf.py
-```
-
-## Run
+### 1. Publish the .NET Worker
 
 ```bash
 dotnet publish DocumentBridge/DocumentBridge.csproj -c Release -r win-x64 --self-contained false -o artifacts
+```
 
-# Build a Word document and save it as DOCX, then render it straight to PDF.
+> Replace `win-x64` with your target platform: `linux-x64`, `osx-arm64`, or `osx-x64`.
+
+### 2. Run CLI Commands
+
+```bash
+# Create DOCX and direct PDF
 python document_sdk.py create-docx
 python document_sdk.py create-pdf
 
-# Convert an existing workbook / presentation to PDF, or watermark a PDF.
+# Convert Excel or PowerPoint to PDF
 python document_sdk.py excel-to-pdf      --input documents/input.xlsx  --output output/workbook.pdf
 python document_sdk.py powerpoint-to-pdf --input documents/input.pptx  --output output/slides.pdf
+
+# Watermark a PDF
 python document_sdk.py watermark-pdf     --input output/workbook.pdf   --output output/watermarked.pdf --label CONFIDENTIAL
 ```
 
-Replace `win-x64` with the RID that matches your platform (`osx-arm64`,
-`osx-x64`, or `linux-x64`). When cross-publishing from Windows, pick the
-RID that matches the **target** machine, not the host.
+### 3. Run Samples
 
-> Every command runs in Syncfusion's **trial mode** by default — no license
-> is required, and evaluation watermarks are added to the output documents.
-> To produce watermark-free output, set the `SYNCFUSION_LICENSE_KEY`
-> environment variable before running the command:
->
-> ```bash
-> # Windows PowerShell
-> $env:SYNCFUSION_LICENSE_KEY = "your-key"
-> # bash / zsh
-> SYNCFUSION_LICENSE_KEY=your-key python document_sdk.py create-pdf
-> ```
->
-> The worker reads the variable on first use; Python callers do not need to
-> pass any flag per call.
+```bash
+python -m samples.01_hello_world
+python -m samples.02_batch_invoices
+python -m samples.03_custom_output_paths
+python -m samples.04_excel_to_pdf
+python -m samples.05_powerpoint_to_pdf
+python -m samples.06_watermark_pdf
+```
 
-> Each operation runs in a fresh `dotnet` subprocess with a default
-> per-operation timeout of **300 seconds**. Override with `--timeout <seconds>`
-> on any subcommand for large PPTX/XLSX conversions.
+## Available Samples
 
-## Samples
-
-See [`samples/README.md`](samples/README.md) for a small set of runnable
-scripts that build on `document_sdk.load_service()`:
-
-| # | Sample | Demonstrates |
-|---|---|---|
-| 1 | `01_hello_world.py` | Minimal end-to-end DOCX + PDF generation. |
-| 2 | `02_batch_invoices.py` | Loop over records and emit one DOCX each. |
-| 3 | `03_custom_output_paths.py` | Custom output folder and non-default bundle path. |
-| 4 | `04_excel_to_pdf.py` | Convert an XLSX workbook to PDF. |
-| 5 | `05_powerpoint_to_pdf.py` | Convert a PPTX presentation to PDF. |
-| 6 | `06_watermark_pdf.py` | Overlay a diagonal text watermark on every page of a PDF. |
+| Sample | Description |
+|---|---|
+| `01_hello_world.py` | Minimal end-to-end DOCX + PDF generation. |
+| `02_batch_invoices.py` | Loop over records and emit one DOCX each. |
+| `03_custom_output_paths.py` | Custom output folder and non-default bundle path. |
+| `04_excel_to_pdf.py` | Convert an XLSX workbook to PDF. |
+| `05_powerpoint_to_pdf.py` | Convert a PPTX presentation to PDF. |
+| `06_watermark_pdf.py` | Overlay a diagonal text watermark on every page of a PDF. |
